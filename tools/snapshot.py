@@ -10,9 +10,14 @@ the previous snapshot instead of shipping an empty one. The app parses these raw
 """
 import json
 import os
+import socket
 import sys
 import urllib.parse
 import urllib.request
+
+# GitHub runners have no IPv6 route, and Overpass answers on both: stick to IPv4.
+_getaddrinfo = socket.getaddrinfo
+socket.getaddrinfo = lambda host, port, family=0, *a, **k: _getaddrinfo(host, port, socket.AF_INET, *a, **k)
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else "app/src/main/assets"
 UA = "ngecas-snapshot/1.0 (personal EV charger app; github.com/eberhard0/ngecas)"
@@ -23,7 +28,11 @@ BBOX = "-6.80,106.30,-5.75,107.45"
 OCM_URL = ("https://api.openchargemap.io/v3/poi/?output=json&countrycode=ID"
            f"&latitude={LAT}&longitude={LON}&distance={KM}&distanceunit=km"
            "&maxresults=5000&compact=false&verbose=false&client=ngecas")
-OVERPASS = "https://overpass-api.de/api/interpreter"
+OVERPASS = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
+]
 QUERY = f"""[out:json][timeout:120];
 (
   node["amenity"="charging_station"]({BBOX});
@@ -60,15 +69,19 @@ def main():
     else:
         print("OCM_API_KEY not set: keeping the committed ocm.json")
 
-    try:
-        text = fetch(OVERPASS, data=urllib.parse.urlencode({"data": QUERY}).encode())
-        elements = json.loads(text).get("elements")
-        if elements is None:
-            raise ValueError(f"unexpected Overpass reply: {text[:200]}")
-        print(f"OpenStreetMap: {len(elements)} charging stations")
-        save("osm.json", text)
-    except Exception as e:
-        print(f"Overpass download failed, keeping the old file: {e}")
+    for endpoint in OVERPASS:
+        try:
+            text = fetch(endpoint, data=urllib.parse.urlencode({"data": QUERY}).encode())
+            elements = json.loads(text).get("elements")
+            if elements is None:
+                raise ValueError(f"unexpected Overpass reply: {text[:200]}")
+            print(f"OpenStreetMap ({endpoint}): {len(elements)} charging stations")
+            save("osm.json", text)
+            break
+        except Exception as e:
+            print(f"Overpass {endpoint} failed: {e}")
+    else:
+        print("All Overpass mirrors failed, keeping the old file")
 
 
 if __name__ == "__main__":

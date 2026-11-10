@@ -76,7 +76,9 @@ jobs:
           # build a debug-signed one as well so it can still be sideloaded.
           if [ -z "$KEYSTORE_FILE" ]; then ./gradlew --no-daemon assembleDebug; fi
 
+      # Artifact storage on this account is often full; releases (v* tags) carry the real builds.
       - uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: ngecas-${{ steps.ver.outputs.name }}
           path: |

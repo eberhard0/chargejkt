@@ -2,7 +2,7 @@
   "version": 0.6,
   "generator": "Overpass API 0.7.62.11 87bfad18",
   "osm3s": {
-    "timestamp_osm_base": "2026-11-10T13:17:12Z",
+    "timestamp_osm_base": "2026-11-10T14:09:06Z",
     "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
   },
   "elements": [
@@ -85,6 +85,20 @@
 },
 {
   "type": "node",
+  "id": 12732885545,
+  "lat": -6.3512854,
+  "lon": 107.1930777,
+  "tags": {
+    "access": "customers",
+    "amenity": "charging_station",
+    "brand": "Utomo Charge+",
+    "capacity": "8",
+    "covered": "yes",
+    "website": "https://utomochargeplus.com/"
+  }
+},
+{
+  "type": "node",
   "id": 12960379004,
   "lat": -6.2208636,
   "lon": 106.6538105,
@@ -112,6 +126,20 @@
   "lon": 107.0085191,
   "tags": {
     "amenity": "charging_station"
+  }
+},
+{
+  "type": "node",
+  "id": 13293910280,
+  "lat": -6.6183463,
+  "lon": 106.8146093,
+  "tags": {
+    "access": "customers",
+    "amenity": "charging_station",
+    "brand": "Polytron",
+    "capacity": "2",
+    "fee": "no",
+    "operator": "Polytron"
   }
 },
 {
@@ -186,6 +214,39 @@
 },
 {
   "type": "node",
+  "id": 13968078003,
+  "lat": -6.6753016,
+  "lon": 107.4391815,
+  "tags": {
+    "amenity": "charging_station",
+    "check_date": "2026-06-26",
+    "operator": "SPKLU PLN",
+    "socket:type2_combo": "2"
+  }
+},
+{
+  "type": "node",
+  "id": 13968078201,
+  "lat": -6.4683157,
+  "lon": 107.4447145,
+  "tags": {
+    "amenity": "charging_station",
+    "check_date": "2026-06-26",
+    "operator": "SPKLU PLN"
+  }
+},
+{
+  "type": "node",
+  "id": 14101900159,
+  "lat": -6.1934997,
+  "lon": 106.4253500,
+  "tags": {
+    "amenity": "charging_station",
+    "name": "SPKLU PLN"
+  }
+},
+{
+  "type": "node",
   "id": 14111780101,
   "lat": -6.2395667,
   "lon": 106.7981265,
@@ -220,6 +281,18 @@
   "tags": {
     "amenity": "charging_station",
     "name": "Kymco ionex Battery Swap Station"
+  }
+},
+{
+  "type": "node",
+  "id": 14179678786,
+  "lat": -6.5529264,
+  "lon": 107.4463742,
+  "tags": {
+    "amenity": "charging_station",
+    "bicycle": "no",
+    "capacity:motorcar": "2",
+    "operator": "Vinfast"
   }
 },
 {

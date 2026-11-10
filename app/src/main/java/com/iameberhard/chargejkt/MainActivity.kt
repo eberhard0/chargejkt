@@ -35,6 +35,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Place
@@ -165,7 +166,8 @@ private fun App(store: StationStore, locator: Locator) {
             NavigationBar(containerColor = CardColor) {
                 NavigationBarItem(tab == 0, { tab = 0 }, { Icon(Icons.Default.Place, null) }, label = { Text("Map") })
                 NavigationBarItem(tab == 1, { tab = 1 }, { Icon(Icons.Default.List, null) }, label = { Text("List") })
-                NavigationBarItem(tab == 2, { tab = 2 }, { Icon(Icons.Default.Settings, null) }, label = { Text("Settings") })
+                NavigationBarItem(tab == 2, { tab = 2 }, { Icon(Icons.Default.Info, null) }, label = { Text("Guide") })
+                NavigationBarItem(tab == 3, { tab = 3 }, { Icon(Icons.Default.Settings, null) }, label = { Text("Settings") })
             }
         },
     ) { pad ->
@@ -173,6 +175,7 @@ private fun App(store: StationStore, locator: Locator) {
             when (tab) {
                 0 -> MapTab(filtered, here, selectedId, filters, onTap = { selectedId = it }, onLocate = { locator.start() })
                 1 -> ListTab(filtered, query, { query = it }, filters, onOpen = { selectedId = it })
+                2 -> GuideTab()
                 else -> SettingsTab(store)
             }
         }
@@ -308,7 +311,9 @@ private fun StationDetail(s: Station, distance: Double, measuredFromPhone: Boole
             Button(onClick = { navigate(context, s) }, modifier = Modifier.weight(1f)) { Text("Navigate") }
             OutlinedButton(onClick = { waze(context, s) }, modifier = Modifier.weight(1f)) { Text("Waze") }
         }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(14.dp))
+        OperatorCard(s)
+        Spacer(Modifier.height(8.dp))
         Label("PLUGS")
         if (s.connectors.isEmpty()) Text("Not listed by the source.", color = Muted)
         for (c in s.connectors) {

@@ -15,6 +15,8 @@ The APK ships with a snapshot of both (`app/src/main/assets/ocm.json`, `osm.json
 with `tools/snapshot.py`); **Settings → Refresh now** downloads fresh copies onto the phone. Both the
 snapshot and a refresh are parsed by the same Kotlin code (`Ocm.kt`, `Osm.kt`).
 
+A **Guide** tab explains how charging works in Jakarta (apps, sign-up, payment, prices per operator as of November 2026), and each charger's sheet shows its operator's app and price with a Get app button.
+
 Filters: DC fast only, plug type (CCS2, Type 2, GB/T DC, GB/T AC, CHAdeMO), saved chargers. Amber
 dots are DC fast chargers, blue dots are AC. Map tiles from OpenFreeMap.
 

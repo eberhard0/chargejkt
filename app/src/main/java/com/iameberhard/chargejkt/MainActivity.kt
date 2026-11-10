@@ -350,11 +350,11 @@ private fun StationDetail(s: Station, distance: Double, measuredFromPhone: Boole
             formatDistance(distance) + (if (measuredFromPhone) " away" else " from Monas") + (if (s.address.isNotBlank()) " · ${s.address}" else ""),
             color = Muted, fontSize = 14.sp,
         )
-        Spacer(Modifier.height(14.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = { navigate(context, s) }, modifier = Modifier.weight(1f)) { Text("Navigate") }
-            OutlinedButton(onClick = { waze(context, s) }, modifier = Modifier.weight(1f)) { Text("Waze") }
-        }
+        Spacer(Modifier.height(12.dp))
+        // Where it is, at a glance; the phone's map apps take over from the Navigate button.
+        MiniMapView(s, Modifier.fillMaxWidth().height(170.dp).clip(RoundedCornerShape(12.dp)))
+        Spacer(Modifier.height(10.dp))
+        Button(onClick = { navigate(context, s) }, modifier = Modifier.fillMaxWidth()) { Text("Navigate") }
         Spacer(Modifier.height(14.dp))
         OperatorCard(s)
         TextButton(onClick = onLogCharge) { Text("Log a charge here") }
@@ -438,20 +438,13 @@ private fun SettingsTab(store: StationStore) {
     }
 }
 
+/** Always offers the chooser, so Google Maps, Waze or any other map app can be picked each time. */
 private fun navigate(context: Context, s: Station) {
     val uri = Uri.parse("geo:${s.lat},${s.lon}?q=${s.lat},${s.lon}(${Uri.encode(s.name)})")
     try {
-        context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+        context.startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW, uri), "Navigate with"))
     } catch (_: ActivityNotFoundException) {
         open(context, "https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}")
-    }
-}
-
-private fun waze(context: Context, s: Station) {
-    try {
-        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("waze://?ll=${s.lat},${s.lon}&navigate=yes")))
-    } catch (_: ActivityNotFoundException) {
-        open(context, "https://waze.com/ul?ll=${s.lat},${s.lon}&navigate=yes")
     }
 }
 

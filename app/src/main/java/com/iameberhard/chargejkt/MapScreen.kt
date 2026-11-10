@@ -225,3 +225,70 @@ class StationMap(context: Context, private val onTap: (String) -> Unit) {
         val NOTHING: FeatureCollection = FeatureCollection.fromFeatures(emptyList<Feature>())
     }
 }
+
+/** A small, non-interactive map of one charger for the detail sheet. */
+@Composable
+fun MiniMapView(s: Station, modifier: Modifier = Modifier) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val map = androidx.compose.runtime.remember(s.id) { MiniMap(context, s) }
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(map) {
+        lifecycle.addObserver(map.lifecycleObserver)
+        onDispose {
+            lifecycle.removeObserver(map.lifecycleObserver)
+            map.destroy()
+        }
+    }
+    AndroidView(factory = { map.view }, modifier = modifier)
+}
+
+class MiniMap(context: Context, private val s: Station) {
+    val view: MapView
+    private var started = false
+    private var resumed = false
+    private var destroyed = false
+
+    val lifecycleObserver = LifecycleEventObserver { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_START -> if (!started && !destroyed) { started = true; view.onStart() }
+            Lifecycle.Event.ON_RESUME -> if (!resumed && !destroyed) { resumed = true; view.onResume() }
+            Lifecycle.Event.ON_PAUSE -> if (resumed) { resumed = false; view.onPause() }
+            Lifecycle.Event.ON_STOP -> if (started) { started = false; view.onStop() }
+            else -> Unit
+        }
+    }
+
+    init {
+        MapLibre.getInstance(context)
+        view = MapView(context)
+        view.onCreate(null)
+        // The sheet starts resumed; a view created mid-lifecycle gets no ON_START/ON_RESUME replay.
+        started = true; view.onStart()
+        resumed = true; view.onResume()
+        view.getMapAsync { ready ->
+            ready.uiSettings.apply {
+                setLogoEnabled(false)
+                setAttributionEnabled(false)
+                setCompassEnabled(false)
+                setAllGesturesEnabled(false)
+            }
+            ready.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(s.lat, s.lon), 15.0))
+            val json = context.assets.open("map_dark.json").bufferedReader().use { it.readText() }
+            ready.setStyle(Style.Builder().fromJson(json)) { loaded ->
+                loaded.addSource(GeoJsonSource("mini", FeatureCollection.fromFeature(Feature.fromGeometry(Point.fromLngLat(s.lon, s.lat)))))
+                loaded.addLayer(
+                    CircleLayer("mini", "mini").withProperties(
+                        circleRadius(9f), circleColor((if (s.fast) FastColor else AcColor).toArgb()),
+                        circleStrokeWidth(3f), circleStrokeColor(android.graphics.Color.WHITE),
+                    ),
+                )
+            }
+        }
+    }
+
+    fun destroy() {
+        if (resumed) { resumed = false; view.onPause() }
+        if (started) { started = false; view.onStop() }
+        if (!destroyed) { destroyed = true; view.onDestroy() }
+    }
+}

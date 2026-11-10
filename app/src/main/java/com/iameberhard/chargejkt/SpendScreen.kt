@@ -208,6 +208,11 @@ private fun EntryDialog(initial: Entry, onSave: (Entry) -> Unit, onDismiss: () -
                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     for (name in OPERATOR_NAMES) FilterChip(operator == name, { operator = name }, { Text(name) })
                 }
+                // One tap for the usual amounts; the field stays for anything else.
+                val quick = if (kind == Kind.TOP_UP) listOf(50_000L, 100_000L, 200_000L, 500_000L, 1_000_000L) else listOf(50_000L, 100_000L, 150_000L, 200_000L, 300_000L)
+                Row(Modifier.horizontalScroll(rememberScrollState()).padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    for (q in quick) FilterChip(amountValue == q, { amount = q.toString() }, { Text(if (q >= 1_000_000) "${q / 1_000_000}jt" else "${q / 1000}rb") })
+                }
                 OutlinedTextField(
                     value = amount, onValueChange = { amount = it.filter { ch -> ch.isDigit() } }, singleLine = true,
                     label = { Text("Amount (Rp)") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

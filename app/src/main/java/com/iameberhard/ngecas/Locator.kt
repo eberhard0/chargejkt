@@ -7,6 +7,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build
+import android.os.Bundle
 import android.os.Looper
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,14 @@ class Locator(private val context: Context) {
     val position: StateFlow<Pair<Double, Double>?> = _position
     private var listening = false
 
-    private val listener = LocationListener { loc -> _position.value = loc.latitude to loc.longitude }
+    // All four callbacks: before Android 11 the interface has no default implementations.
+    private val listener = object : LocationListener {
+        override fun onLocationChanged(loc: Location) { _position.value = loc.latitude to loc.longitude }
+        @Deprecated("Deprecated in Java")
+        override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) = Unit
+        override fun onProviderEnabled(provider: String) = Unit
+        override fun onProviderDisabled(provider: String) = Unit
+    }
 
     val granted: Boolean
         get() = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||

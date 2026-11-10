@@ -225,8 +225,9 @@ private fun MapTab(
 ) {
     val context = LocalContext.current
     val map = remember { StationMap(context, onTap) }
+    val plain = remember(stations) { stations.map { it.first } }
     Box(Modifier.fillMaxSize()) {
-        StationMapView(map, stations.map { it.first }, here, selectedId, Modifier.fillMaxSize())
+        StationMapView(map, plain, here, selectedId, Modifier.fillMaxSize())
         Column(Modifier.align(Alignment.TopStart).fillMaxWidth()) {
             filters()
             Text(

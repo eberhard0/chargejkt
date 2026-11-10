@@ -69,9 +69,10 @@ fun SpendTab(store: SpendStore, prefill: Prefill?, onPrefillUsed: () -> Unit) {
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = { creating = Prefill(Kind.CHARGE, "", "") }, modifier = Modifier.weight(1f)) { Text("+ Charge") }
-            OutlinedButton(onClick = { creating = Prefill(Kind.TOP_UP, "", "") }, modifier = Modifier.weight(1f)) { Text("+ Top-up") }
+            Button(onClick = { creating = Prefill(Kind.CHARGE, "", "") }, modifier = Modifier.weight(1f)) { Text("Log a charge") }
+            OutlinedButton(onClick = { creating = Prefill(Kind.TOP_UP, "", "") }, modifier = Modifier.weight(1f)) { Text("Log a top-up") }
         }
+        Text("Record each charging session you paid for, and each time you add money to an operator's app.", color = Muted, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
         Spacer(Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TotalCard("THIS WEEK", week, Modifier.weight(1f))
@@ -197,7 +198,7 @@ private fun EntryDialog(initial: Entry, onSave: (Entry) -> Unit, onDismiss: () -
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (initial.id == 0L) "Log" else "Edit") },
+        title = { Text((if (initial.id == 0L) "Log a " else "Edit ") + (if (kind == Kind.TOP_UP) "top-up" else "charge")) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {

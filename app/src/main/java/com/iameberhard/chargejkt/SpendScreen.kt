@@ -120,29 +120,32 @@ fun SpendTab(store: SpendStore, prefill: Prefill?, onPrefillUsed: () -> Unit) {
 
         Spacer(Modifier.height(16.dp))
         Text("Entries", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-        Text("Tap an entry to edit it, × to delete.", color = Muted, fontSize = 12.sp)
+        Text("Every entry can be changed or removed.", color = Muted, fontSize = 12.sp)
         val fmt = remember { DateTimeFormatter.ofPattern("EEE d MMM") }
         for (e in entries.take(200)) {
-            Row(
-                Modifier.fillMaxWidth().padding(top = 8.dp).clip(RoundedCornerShape(10.dp)).background(CardColor).clickable { editing = e }.padding(10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(Modifier.weight(1f)) {
+            Column(Modifier.fillMaxWidth().padding(top = 8.dp).clip(RoundedCornerShape(10.dp)).background(CardColor).clickable { editing = e }.padding(start = 12.dp, end = 4.dp, top = 10.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            (if (e.kind == Kind.TOP_UP) "Top-up · " else "Charge · ") + e.operator.ifBlank { "Other" } +
+                                (if (e.station.isNotBlank()) " · ${e.station}" else ""),
+                            fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            dateOf(e.atMs).format(fmt) + (e.kwh?.let { " · %.1f kWh".format(it) } ?: "") + (if (e.note.isNotBlank()) " · ${e.note}" else ""),
+                            color = Muted, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                     Text(
-                        (if (e.kind == Kind.TOP_UP) "Top-up · " else "Charge · ") + e.operator.ifBlank { "Other" } +
-                            (if (e.station.isNotBlank()) " · ${e.station}" else ""),
-                        fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        dateOf(e.atMs).format(fmt) + (e.kwh?.let { " · %.1f kWh".format(it) } ?: "") + (if (e.note.isNotBlank()) " · ${e.note}" else ""),
-                        color = Muted, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        (if (e.kind == Kind.TOP_UP) "+" else "−") + formatRp(e.amount),
+                        color = if (e.kind == Kind.TOP_UP) Accent else Color.White, fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(end = 8.dp),
                     )
                 }
-                Text(
-                    (if (e.kind == Kind.TOP_UP) "+" else "−") + formatRp(e.amount),
-                    color = if (e.kind == Kind.TOP_UP) Accent else Color.White, fontWeight = FontWeight.Bold,
-                )
-                TextButton(onClick = { confirmDelete = e }) { Text("×", color = Muted, fontSize = 18.sp) }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = { editing = e }) { Text("Edit") }
+                    TextButton(onClick = { confirmDelete = e }) { Text("Delete", color = FastColor) }
+                }
             }
         }
         Spacer(Modifier.height(24.dp))
@@ -156,7 +159,7 @@ fun SpendTab(store: SpendStore, prefill: Prefill?, onPrefillUsed: () -> Unit) {
         )
     }
     editing?.let { e ->
-        EntryDialog(initial = e, onSave = { store.save(it); editing = null }, onDismiss = { editing = null })
+        EntryDialog(initial = e, onSave = { store.save(it); editing = null }, onDismiss = { editing = null }, onDelete = { editing = null; confirmDelete = e })
     }
     confirmDelete?.let { e ->
         AlertDialog(
@@ -184,7 +187,7 @@ private fun TotalCard(title: String, p: PeriodTotal?, modifier: Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EntryDialog(initial: Entry, onSave: (Entry) -> Unit, onDismiss: () -> Unit) {
+private fun EntryDialog(initial: Entry, onSave: (Entry) -> Unit, onDismiss: () -> Unit, onDelete: (() -> Unit)? = null) {
     var kind by remember { mutableStateOf(initial.kind) }
     var operator by remember { mutableStateOf(initial.operator) }
     var amount by remember { mutableStateOf(if (initial.amount > 0) initial.amount.toString() else "") }
@@ -254,7 +257,12 @@ private fun EntryDialog(initial: Entry, onSave: (Entry) -> Unit, onDismiss: () -
                 },
             ) { Text("Save") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = {
+            Row {
+                if (onDelete != null) TextButton(onClick = onDelete) { Text("Delete", color = FastColor) }
+                TextButton(onClick = onDismiss) { Text("Cancel") }
+            }
+        },
     )
 
     if (pickDate) {

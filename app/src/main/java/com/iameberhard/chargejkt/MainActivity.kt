@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -52,6 +54,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -72,6 +76,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -164,27 +169,47 @@ private fun App(store: StationStore, spend: SpendStore, locator: Locator) {
         )
     }
 
-    Scaffold(
-        containerColor = Bg,
-        bottomBar = {
-            NavigationBar(containerColor = CardColor) {
-                NavigationBarItem(tab == 0, { tab = 0 }, { Icon(Icons.Default.Place, null) }, label = { Text("Map") })
-                NavigationBarItem(tab == 1, { tab = 1 }, { Icon(Icons.Default.List, null) }, label = { Text("List") })
-                NavigationBarItem(tab == 2, { tab = 2 }, { Icon(Icons.Default.ShoppingCart, null) }, label = { Text("Spend") })
-                NavigationBarItem(tab == 3, { tab = 3 }, { Icon(Icons.Default.Info, null) }, label = { Text("Guide") })
-                NavigationBarItem(tab == 4, { tab = 4 }, { Icon(Icons.Default.Settings, null) }, label = { Text("Settings") })
-            }
-        },
-    ) { pad ->
+    // Fold 8 open (or a tablet): tabs on a side rail and the list beside the map. Closed Fold and
+    // ordinary phones: bottom bar, one pane. Width is re-read on every fold/unfold.
+    val widthDp = LocalConfiguration.current.screenWidthDp
+    val wide = widthDp >= 600
+    val twoPane = widthDp >= 840
+    val tabs = listOf("Map" to Icons.Default.Place, "List" to Icons.Default.List, "Spend" to Icons.Default.ShoppingCart, "Guide" to Icons.Default.Info, "Settings" to Icons.Default.Settings)
+    val content: @Composable (PaddingValues) -> Unit = { pad ->
         Box(Modifier.padding(pad).fillMaxSize()) {
             when (tab) {
-                0 -> MapTab(filtered, here, selectedId, filters, onTap = { selectedId = it }, onLocate = { locator.start() })
+                0 -> if (twoPane) Row(Modifier.fillMaxSize()) {
+                    Box(Modifier.width(400.dp).fillMaxSize()) { ListTab(filtered, query, { query = it }, filters, onOpen = { selectedId = it }) }
+                    MapTab(filtered, here, selectedId, {}, onTap = { selectedId = it }, onLocate = { locator.start() })
+                } else MapTab(filtered, here, selectedId, filters, onTap = { selectedId = it }, onLocate = { locator.start() })
                 1 -> ListTab(filtered, query, { query = it }, filters, onOpen = { selectedId = it })
-                2 -> SpendTab(spend, prefill, onPrefillUsed = { prefill = null })
-                3 -> GuideTab()
-                else -> SettingsTab(store)
+                2 -> Readable { SpendTab(spend, prefill, onPrefillUsed = { prefill = null }) }
+                3 -> Readable { GuideTab() }
+                else -> Readable { SettingsTab(store) }
             }
         }
+    }
+    if (wide) {
+        Row(Modifier.fillMaxSize().background(Bg)) {
+            NavigationRail(containerColor = CardColor) {
+                Spacer(Modifier.height(12.dp))
+                tabs.forEachIndexed { i, (name, icon) ->
+                    NavigationRailItem(tab == i, { tab = i }, { Icon(icon, null) }, label = { Text(name) })
+                }
+            }
+            Scaffold(containerColor = Bg) { pad -> content(pad) }
+        }
+    } else {
+        Scaffold(
+            containerColor = Bg,
+            bottomBar = {
+                NavigationBar(containerColor = CardColor) {
+                    tabs.forEachIndexed { i, (name, icon) ->
+                        NavigationBarItem(tab == i, { tab = i }, { Icon(icon, null) }, label = { Text(name) })
+                    }
+                }
+            },
+        ) { pad -> content(pad) }
     }
 
     if (selected != null) {
@@ -202,6 +227,14 @@ private fun App(store: StationStore, spend: SpendStore, locator: Locator) {
                 },
             )
         }
+    }
+}
+
+/** Text screens read best under ~720 dp wide; on the open Fold they sit centred instead of stretching. */
+@Composable
+private fun Readable(content: @Composable () -> Unit) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        Box(Modifier.widthIn(max = 720.dp).fillMaxSize()) { content() }
     }
 }
 

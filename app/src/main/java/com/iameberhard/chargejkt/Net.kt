@@ -1,4 +1,4 @@
-package com.iameberhard.ngecas
+package com.iameberhard.chargejkt
 
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -6,7 +6,7 @@ import java.net.URL
 
 /** Plain HttpURLConnection: two requests a day do not need a client library. */
 object Net {
-    private const val UA = "ngecas/${BuildConfig.VERSION_NAME} (personal EV charger app)"
+    private const val UA = "chargejkt/${BuildConfig.VERSION_NAME} (personal EV charger app)"
 
     fun get(url: String, headers: Map<String, String> = emptyMap()): String = request(url, null, headers)
 

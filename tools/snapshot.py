@@ -20,14 +20,14 @@ _getaddrinfo = socket.getaddrinfo
 socket.getaddrinfo = lambda host, port, family=0, *a, **k: _getaddrinfo(host, port, socket.AF_INET, *a, **k)
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else "app/src/main/assets"
-UA = "ngecas-snapshot/1.0 (personal EV charger app; github.com/eberhard0/ngecas)"
+UA = "chargejkt-snapshot/1.0 (personal EV charger app; github.com/eberhard0/chargejkt)"
 # Jakarta centre; the bounding box is Jabodetabek plus a margin.
 LAT, LON, KM = -6.25, 106.85, 60
 BBOX = "-6.80,106.30,-5.75,107.45"
 
 OCM_URL = ("https://api.openchargemap.io/v3/poi/?output=json&countrycode=ID"
            f"&latitude={LAT}&longitude={LON}&distance={KM}&distanceunit=km"
-           "&maxresults=5000&compact=false&verbose=false&client=ngecas")
+           "&maxresults=5000&compact=false&verbose=false&client=chargejkt")
 OVERPASS = [
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",

@@ -1,4 +1,4 @@
-package com.iameberhard.ngecas
+package com.iameberhard.chargejkt
 
 import android.Manifest
 import android.content.Context

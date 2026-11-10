@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.iameberhard.ngecas"
+    namespace = "com.iameberhard.chargejkt"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.iameberhard.ngecas"
+        applicationId = "com.iameberhard.chargejkt"
         minSdk = 26
         targetSdk = 35
         // CI passes the run number / tag through the environment; local builds fall back to 1 / 1.0.0.

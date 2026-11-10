@@ -20,5 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Ngecas"
+rootProject.name = "ChargeJKT"
 include(":app")

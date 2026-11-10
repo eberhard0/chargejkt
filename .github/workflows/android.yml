@@ -5,7 +5,7 @@ name: Android
 # Every v* tag: build a signed AAB + APK and attach them to a GitHub Release.
 #
 # Signing needs four repository secrets: KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_PASSWORD, KEY_ALIAS
-# (set with ~/hindsight-keys/set-github-secrets.sh, REPO=eberhard0/ngecas).
+# (set with ~/hindsight-keys/set-github-secrets.sh, REPO=eberhard0/chargejkt).
 
 on:
   push:
@@ -80,7 +80,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         with:
-          name: ngecas-${{ steps.ver.outputs.name }}
+          name: chargejkt-${{ steps.ver.outputs.name }}
           path: |
             app/build/outputs/bundle/release/*.aab
             app/build/outputs/apk/release/*.apk

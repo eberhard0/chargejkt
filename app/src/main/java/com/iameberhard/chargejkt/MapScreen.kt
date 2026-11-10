@@ -1,4 +1,4 @@
-package com.iameberhard.ngecas
+package com.iameberhard.chargejkt
 
 import android.content.Context
 import android.graphics.PointF

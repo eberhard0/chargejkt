@@ -1,4 +1,4 @@
-package com.iameberhard.ngecas
+package com.iameberhard.chargejkt
 
 import org.json.JSONArray
 import org.json.JSONObject
@@ -14,7 +14,7 @@ object Ocm {
 
     val url = "https://api.openchargemap.io/v3/poi/?output=json&countrycode=ID" +
         "&latitude=$LAT&longitude=$LON&distance=$KM&distanceunit=km" +
-        "&maxresults=5000&compact=false&verbose=false&client=ngecas"
+        "&maxresults=5000&compact=false&verbose=false&client=chargejkt"
 
     fun fetch(key: String): String = Net.get(url, mapOf("X-API-Key" to key))
 

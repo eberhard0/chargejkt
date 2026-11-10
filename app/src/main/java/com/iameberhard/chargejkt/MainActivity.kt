@@ -1,4 +1,4 @@
-package com.iameberhard.ngecas
+package com.iameberhard.chargejkt
 
 import android.Manifest
 import android.content.ActivityNotFoundException
@@ -380,7 +380,7 @@ private fun SettingsTab(store: StationStore) {
         Spacer(Modifier.height(24.dp))
         Text("About", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         Text(
-            "Ngecas ${BuildConfig.VERSION_NAME} lists public EV chargers in Jakarta and about 60 km around it.\n\n" +
+            "ChargeJKT ${BuildConfig.VERSION_NAME} lists public EV chargers in Jakarta and about 60 km around it.\n\n" +
                 "Data: Open Charge Map (openchargemap.org, CC BY 4.0) and OpenStreetMap contributors (ODbL). " +
                 "Map tiles: OpenFreeMap, © OpenStreetMap contributors.\n\n" +
                 "Amber dots are DC fast chargers, blue dots are AC. Missing or wrong charger? Add it on openchargemap.org and refresh.",

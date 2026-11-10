@@ -1,4 +1,4 @@
-package com.iameberhard.ngecas
+package com.iameberhard.chargejkt
 
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
@@ -19,7 +19,7 @@ class StationStore(private val context: Context) {
 
     data class Info(val ocm: Int = 0, val osm: Int = 0, val refreshedAt: Long = 0L, val message: String = "")
 
-    private val prefs = context.getSharedPreferences("ngecas", Context.MODE_PRIVATE)
+    private val prefs = context.getSharedPreferences("chargejkt", Context.MODE_PRIVATE)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val _stations = MutableStateFlow<List<Station>>(emptyList())

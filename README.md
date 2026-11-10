@@ -1,4 +1,4 @@
-# Ngecas
+# ChargeJKT
 
 Public EV chargers in Jakarta (and about 60 km around it) on a map and in a nearest-first list, for
 the Fold. Tap a charger for its plugs, power, cost, hours and notes, then **Navigate** (Google Maps

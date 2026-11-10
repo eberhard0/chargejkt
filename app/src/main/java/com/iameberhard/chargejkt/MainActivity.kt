@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -101,14 +102,16 @@ private val JAKARTA = -6.1754 to 106.8272
 
 class MainActivity : ComponentActivity() {
     private lateinit var store: StationStore
+    private lateinit var spend: SpendStore
     private lateinit var locator: Locator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         store = StationStore(applicationContext)
+        spend = SpendStore(applicationContext)
         locator = Locator(applicationContext)
-        setContent { MaterialTheme(colorScheme = Scheme) { App(store, locator) } }
+        setContent { MaterialTheme(colorScheme = Scheme) { App(store, spend, locator) } }
     }
 
     override fun onStart() {
@@ -124,7 +127,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun App(store: StationStore, locator: Locator) {
+private fun App(store: StationStore, spend: SpendStore, locator: Locator) {
     val stations by store.stations.collectAsStateWithLifecycle()
     val favorites by store.favorites.collectAsStateWithLifecycle()
     val plugs by store.plugs.collectAsStateWithLifecycle()
@@ -134,6 +137,7 @@ private fun App(store: StationStore, locator: Locator) {
     var query by rememberSaveable { mutableStateOf("") }
     var savedOnly by rememberSaveable { mutableStateOf(false) }
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
+    var prefill by remember { mutableStateOf<Prefill?>(null) }
 
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { locator.start() }
     LaunchedEffect(Unit) {
@@ -166,8 +170,9 @@ private fun App(store: StationStore, locator: Locator) {
             NavigationBar(containerColor = CardColor) {
                 NavigationBarItem(tab == 0, { tab = 0 }, { Icon(Icons.Default.Place, null) }, label = { Text("Map") })
                 NavigationBarItem(tab == 1, { tab = 1 }, { Icon(Icons.Default.List, null) }, label = { Text("List") })
-                NavigationBarItem(tab == 2, { tab = 2 }, { Icon(Icons.Default.Info, null) }, label = { Text("Guide") })
-                NavigationBarItem(tab == 3, { tab = 3 }, { Icon(Icons.Default.Settings, null) }, label = { Text("Settings") })
+                NavigationBarItem(tab == 2, { tab = 2 }, { Icon(Icons.Default.ShoppingCart, null) }, label = { Text("Spend") })
+                NavigationBarItem(tab == 3, { tab = 3 }, { Icon(Icons.Default.Info, null) }, label = { Text("Guide") })
+                NavigationBarItem(tab == 4, { tab = 4 }, { Icon(Icons.Default.Settings, null) }, label = { Text("Settings") })
             }
         },
     ) { pad ->
@@ -175,7 +180,8 @@ private fun App(store: StationStore, locator: Locator) {
             when (tab) {
                 0 -> MapTab(filtered, here, selectedId, filters, onTap = { selectedId = it }, onLocate = { locator.start() })
                 1 -> ListTab(filtered, query, { query = it }, filters, onOpen = { selectedId = it })
-                2 -> GuideTab()
+                2 -> SpendTab(spend, prefill, onPrefillUsed = { prefill = null })
+                3 -> GuideTab()
                 else -> SettingsTab(store)
             }
         }
@@ -189,6 +195,11 @@ private fun App(store: StationStore, locator: Locator) {
                 measuredFromPhone = here != null,
                 saved = selected.id in favorites,
                 onSave = { store.toggleFavorite(selected.id) },
+                onLogCharge = {
+                    prefill = Prefill(Kind.CHARGE, guideFor(selected)?.name?.substringBefore(" (") ?: "Other", selected.name)
+                    selectedId = null
+                    tab = 2
+                },
             )
         }
     }
@@ -292,7 +303,7 @@ private fun StationRow(s: Station, distance: Double, onClick: () -> Unit) {
 }
 
 @Composable
-private fun StationDetail(s: Station, distance: Double, measuredFromPhone: Boolean, saved: Boolean, onSave: () -> Unit) {
+private fun StationDetail(s: Station, distance: Double, measuredFromPhone: Boolean, saved: Boolean, onSave: () -> Unit, onLogCharge: () -> Unit) {
     val context = LocalContext.current
     Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 20.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -313,7 +324,7 @@ private fun StationDetail(s: Station, distance: Double, measuredFromPhone: Boole
         }
         Spacer(Modifier.height(14.dp))
         OperatorCard(s)
-        Spacer(Modifier.height(8.dp))
+        TextButton(onClick = onLogCharge) { Text("Log a charge here") }
         Label("PLUGS")
         if (s.connectors.isEmpty()) Text("Not listed by the source.", color = Muted)
         for (c in s.connectors) {

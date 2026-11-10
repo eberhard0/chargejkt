@@ -17,6 +17,8 @@ snapshot and a refresh are parsed by the same Kotlin code (`Ocm.kt`, `Osm.kt`).
 
 A **Guide** tab explains how charging works in Jakarta (apps, sign-up, payment, prices per operator as of November 2026), and each charger's sheet shows its operator's app and price with a Get app button.
 
+A **Spend** tab logs top-ups and charging sessions per operator (SQLite on the phone): this week and this month totals, weekly/monthly history with kWh and Rp/kWh, and what is left in each app; "Log a charge here" in a charger's sheet pre-fills the operator.
+
 Filters: DC fast only, plug type (CCS2, Type 2, GB/T DC, GB/T AC, CHAdeMO), saved chargers. Amber
 dots are DC fast chargers, blue dots are AC. Map tiles from OpenFreeMap.
 
